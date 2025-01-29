@@ -27,11 +27,16 @@
       <div id="map"></div>
       <canvas id="deck-canvas"></canvas>
       <div id="story-card">
-        <p class="overline">✨👀 You're viewing</p>
+        <!-- <p class="overline">✨👀 You're viewing</p>
         <h2>Other charts</h2>
         <p>Did you know you can use the existing <a href="https://docs.carto.com/carto-for-developers/reference/carto-widgets-reference/models" rel="noopener noreferrer" target="_blank"></a>CARTO Widget models</a> to build any type of custom chart? This example showcases that, using 3.6M of Citi Bike trips in Manhattan.</p>
-        <p class="small">Our two custom charts (Sankey and Radar) are powered by models like <code>getCategories</code> or <code>getTable</code>. Both widgets are filtered by the current map state using <code>spatialFilter</code>. Learn more about <a href="https://docs.carto.com/carto-for-developers/charts-and-widgets" rel="noopener noreferrer" target="_blank">building charts and widgets with CARTO</a>.</p>
+        <p class="small">Our two custom charts (Sankey and Radar) are powered by models like <code>getCategories</code> or <code>getTable</code>. Both widgets are filtered by the current map state using <code>spatialFilter</code>. Learn more about <a href="https://docs.carto.com/carto-for-developers/charts-and-widgets" rel="noopener noreferrer" target="_blank">building charts and widgets with CARTO</a>.</p> -->
         <hr>
+
+        <div class="widget-wrapper">
+          <p class="widget-title overline">Total Trips</p>
+          <div class="echarts-radar" id="formula-widget" style="font-size: 3.9rem;">
+        </div>
         <div class="widget-wrapper">
           <p class="widget-title overline">Trips by day of week</p>
           <div class="echarts-radar" id="radar-widget">

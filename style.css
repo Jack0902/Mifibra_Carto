@@ -30,8 +30,8 @@ canvas {
 
 #story-card {
   padding: 1.75rem;
-  background: #fdfdfe;
-  box-shadow: 4px 4px 8px #30303099;
+  background: #ffffff;
+  box-shadow: 4px 4px 8px rgba(255, 0, 221, 0.6);
   border-radius: 4px;
   z-index: 1;
   margin: 1.5rem;
@@ -103,6 +103,10 @@ code {
   height: 200px;
 }
 
+.echarts-formula {
+  width: 100%;
+  height: 200px;
+}
 .small {
   font-size: 0.9rem;
 }

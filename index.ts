@@ -3,7 +3,7 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {WebMercatorViewport, Deck} from '@deck.gl/core';
 import {vectorQuerySource, createViewportSpatialFilter} from '@carto/api-client';
-import {BASEMAP, VectorTileLayer, colorContinuous} from '@deck.gl/carto';
+import {BASEMAP, VectorTileLayer, colorCategories, colorContinuous} from '@deck.gl/carto';
 import * as echarts from 'echarts';
 import {debounce} from './utils';
 
@@ -15,9 +15,9 @@ const cartoConfig = {apiBaseUrl, accessToken, connectionName};
 // init deckgl
 
 const INITIAL_VIEW_STATE = {
-  latitude: 40.7597343,
-  longitude: -74.046199,
-  zoom: 11.5,
+  latitude: -5.191561299802148,
+  longitude: -80.5872,
+  zoom: 8,
   bearing: 0,
   pitch: 0
 };
@@ -40,9 +40,11 @@ const map = new maplibregl.Map({
 
 const radarWidget = document.querySelector<HTMLSelectElement>('#radar-widget');
 const sankeyWidget = document.querySelector<HTMLSelectElement>('#sankey-widget');
+const formulaWidget = document.querySelector<HTMLSelectElement>('#formula-widget');
 
 var radarWidgetChart = echarts.init(radarWidget);
 var sankeyWidgetChart = echarts.init(sankeyWidget);
+var formulaWidgetChart = echarts.init(formulaWidget);
 
 // define sources
 
@@ -54,12 +56,11 @@ async function initSources() {
   dataSource = await vectorQuerySource({
     ...cartoConfig,
     sqlQuery: `SELECT
-      start_geom AS geom,
       *
     FROM
-      carto-demo-data.demo_tables.manhattan_citibike_trips`
+    carto-dw-ac-p66e86fb.shared.Clientes_T`
   });
-
+  
   sankeyDataSource = await vectorQuerySource({
     ...cartoConfig,
     sqlQuery: `SELECT * FROM cartobq.docs.nyc_citibike_neighborhood_flows`
@@ -110,11 +111,12 @@ async function renderWidgets() {
 
   radarWidgetChart.showLoading();
   sankeyWidgetChart.showLoading();
+  formulaWidgetChart.showLoading();
 
   // configure widgets
 
   const radarData = await dataSource.widgetSource.getCategories({
-    column: 'weekday',
+    column: 'estado_abonado',
     operation: 'count',
     spatialFilter: viewportSpatialFilter
   });
@@ -127,9 +129,17 @@ async function renderWidgets() {
     spatialFilter: viewportSpatialFilter
   });
 
+  
+  formulaWidget.innerHTML = 'Loading...';
+
+  const formula = await dataSource.widgetSource.getFormula({
+    operation: 'count',
+    spatialFilter: viewportSpatialFilter
+  });
+
   // Prepare our radar chart
   const radarAxisMax = Math.max(...radarData.map(item => item.value)) * 1.25;
-  const weekOrder = ['Sunday', 'Saturday', 'Friday', 'Thursday', 'Wednesday', 'Tuesday', 'Monday'];
+  const weekOrder = ['ACTIVO', 'CORTADO', 'POR INSTALAR', 'RETIRADO POR FALTA DE PAGO', 'RETIRADO PEDIDO CLIENTE'];
   const sortedRadar = radarData.sort(
     (a, b) => weekOrder.indexOf(a.name) - weekOrder.indexOf(b.name)
   );
@@ -137,13 +147,11 @@ async function renderWidgets() {
   const radarOption = {
     radar: {
       indicator: [
-        {name: 'Sun', max: radarAxisMax},
-        {name: 'Sat', max: radarAxisMax},
-        {name: 'Fri', max: radarAxisMax},
-        {name: 'Thu', max: radarAxisMax},
-        {name: 'Wed', max: radarAxisMax},
-        {name: 'Tue', max: radarAxisMax},
-        {name: 'Mon', max: radarAxisMax}
+        {name: 'Act', max: radarAxisMax},
+        {name: 'Cor', max: radarAxisMax},
+        {name: 'Ins', max: radarAxisMax},
+        {name: 'Ret. FP', max: radarAxisMax},
+        {name: 'Ret. APC', max: radarAxisMax}
       ]
     },
     series: [
@@ -209,6 +217,9 @@ async function renderWidgets() {
   sankeyWidgetChart.setOption(sankeyOption);
   radarWidgetChart.hideLoading();
   sankeyWidgetChart.hideLoading();
+  formulaWidgetChart.hideLoading();
+  
+  formulaWidget.innerHTML = formula.value;
 }
 
 // render Layers function
@@ -220,7 +231,15 @@ async function renderLayers() {
   }
 
   // now for the layers
-
+  const colorMapping = {
+    'ACTIVO': [73, 255, 26],       // Verde
+    'CORTADO': [255, 244, 0],    // Amarillo
+    'RETIRADO POR FALTA DE PAGO': [253, 164, 3], // Naranja
+    'RETIRADO PEDIDO CLIENTE': [254, 11, 7],     // Rojo
+    'POR INSTALAR': [249, 249, 249],      // Gris (para valores no definidos)
+    'OTROS': [128, 128, 128]   
+  };
+  
   const layers = [
     new VectorTileLayer({
       id: 'neighborhoods',
@@ -241,9 +260,9 @@ async function renderLayers() {
       data: dataSource,
       getPointRadius: 50,
       pointRadiusMinPixels: 2,
-      getFillColor: [200, 0, 80],
-      getLineColor: [255, 255, 255],
-      getLineWidth: 5,
+      getFillColor: d => colorMapping[d.properties.estado_abonado] || colorMapping['OTRO'],
+      getLineColor: [0, 0, 0],
+      getLineWidth: 1,
       lineWidthMinPixels: 1
     })
   ];
