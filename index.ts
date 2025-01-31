@@ -15,13 +15,20 @@ const cartoConfig = {apiBaseUrl, accessToken, connectionName};
 
 // init deckgl
 type BartSegment = {
+  filial: string;
+  ruta: string;
+  inbound_txt: string;
+  outbound_txt: string;
+  fecha: string;
   inbound: number;
   outbound: number;
   from: {
+    tipo: string;
     name: string;
     coordinate: [longitude: number, latitude: number];
   };
   to: {
+    tipo: string;
     name: string;
     coordinate: [longitude: number, latitude: number];
   };
@@ -143,7 +150,6 @@ async function renderWidgets() {
   //   spatialFilter: viewportSpatialFilter
   // });
 
-  
   // formulaWidget.innerHTML = 'Loading...';
 
   const formula = await dataSource.widgetSource.getFormula({
